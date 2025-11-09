@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MarketOrbit MVP Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body style="background:#0E1116;color:#fff;font-family:sans-serif;padding:2rem;">
+    <h1>MarketOrbit – Test Poster</h1>
+    <p>Enter a topic and I will generate a post and send it to your Facebook Page (using your Netlify env vars).</p>
+
+    <input
+      id="topic"
+      placeholder="AI for wellness brands"
+      style="padding:0.5rem;width:300px;max-width:100%;"
+    />
+    <button
+      id="go"
+      style="margin-left:0.5rem;padding:0.5rem 1rem;background:#38bdf8;border:none;border-radius:6px;color:#000;cursor:pointer;"
+    >
+      Generate & Post
+    </button>
+
+    <pre id="out" style="margin-top:1.5rem;background:#111;padding:1rem;border-radius:8px;white-space:pre-wrap;"></pre>
+
+    <script>
+      document.getElementById("go").onclick = async () => {
+        const topic = document.getElementById("topic").value;
+        const res = await fetch("/.netlify/functions/generate-and-post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic }),
+        });
+        const data = await res.json();
+        document.getElementById("out").textContent = JSON.stringify(data, null, 2);
+      };
+    </script>
+  </body>
+</html>
