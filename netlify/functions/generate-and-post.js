@@ -50,6 +50,15 @@ export async function handler(event, context) {
     `🌟 Exciting news from MarketOrbit MVP! 💥 We’re thrilled to help you elevate your marketing game with our intuitive tools and insights. Whether you're a small business or a marketing pro, we've got something for everyone! Let’s connect and grow together! 💪✨ #MarketingMadeEasy #MarketOrbitMVP #GrowYourBusiness` +
     (topic ? ` #${topic.replace(/\s+/g, "")}` : "");
 
+  // log this action to Supabase
+await logActivity({
+  action: mode === "post" ? "post_to_facebook" : "generate_draft",
+  topic,
+  caption,
+  status: "ok",
+  provider: mode === "post" ? "facebook" : "openai",
+});
+
   // this is what we’ll return to the UI
   const payload = {
     ok: true,
