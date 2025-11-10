@@ -1,67 +1,34 @@
-// netlify/functions/get-logs.js
+import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE
+);
 
-exports.handler = async (event, context) => {
-  // 1) make sure env vars exist
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ok: false,
-        message: "Supabase env vars missing in Netlify.",
-      }),
-    };
-  }
-
-  // 2) build Supabase REST URL
-  const url = `${SUPABASE_URL}/rest/v1/activity_logs?select=*&order=created_at.desc&limit=50`;
-
+export async function handler() {
   try {
-    // 3) call Supabase
-    const resp = await fetch(url, {
-      headers: {
-        apikey: SUPABASE_SERVICE_ROLE,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
-        Prefer: "return=representation",
-      },
-    });
+    const { data, error } = await supabase
+      .from("activity_logs") // ✅ Must match the table name in your screenshot
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    if (!resp.ok) {
-      const text = await resp.text();
+    if (error) {
+      console.error("Supabase query error:", error.message);
       return {
         statusCode: 500,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ok: false,
-          message: "Supabase responded with an error.",
-          supabase: text,
-        }),
+        body: JSON.stringify({ ok: false, error: error.message }),
       };
     }
 
-    const rows = await resp.json();
-
-    // 👈 this is the important part: return `logs`
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ok: true,
-        logs: rows, // <--
-      }),
+      body: JSON.stringify({ ok: true, logs: data || [] }),
     };
   } catch (err) {
+    console.error("Function error:", err);
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ok: false,
-        message: "Exception calling Supabase.",
-        error: String(err),
-      }),
+      body: JSON.stringify({ ok: false, error: err.message }),
     };
   }
-};
+}
