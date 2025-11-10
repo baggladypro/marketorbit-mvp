@@ -14,72 +14,43 @@ exports.handler = async function () {
     };
   }
 
-  const base = `${SUPABASE_URL}/rest/v1/activity_logs`;
+  const url = `${SUPABASE_URL}/rest/v1/activity_logs?select=*&order=created_at.desc&limit=50`;
 
   try {
-    // 1) write a test row through the SAME API we're reading from
-    const insertRes = await fetch(base, {
-      method: "POST",
+    const resp = await fetch(url, {
       headers: {
         apikey: SUPABASE_SERVICE_ROLE,
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify({
-        action: "netlify_probe",
-        topic: "api wrote this",
-        caption: "if you see this, API is writing to a DB",
-      }),
-    });
-
-    const insertText = await insertRes.text();
-
-    // 2) now read back
-    const selectUrl = `${base}?select=*&order=id.desc&limit=50`;
-    const selectRes = await fetch(selectUrl, {
-      headers: {
-        apikey: SUPABASE_SERVICE_ROLE,
-        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
-        Prefer: "return=representation",
       },
     });
-    const selectText = await selectRes.text();
 
-    let rows = [];
-    try {
-      rows = JSON.parse(selectText);
-      if (!Array.isArray(rows)) rows = [];
-    } catch (e) {
-      rows = [];
+    const text = await resp.text();
+
+    if (!resp.ok) {
+      return {
+        statusCode: resp.status,
+        body: JSON.stringify({
+          ok: false,
+          error: "Supabase returned an error",
+          supabase: text,
+        }),
+      };
     }
+
+    const data = JSON.parse(text);
 
     return {
       statusCode: 200,
-      body: JSON.stringify(
-        {
-          ok: true,
-          wrote: {
-            status: insertRes.status,
-            raw: insertText,
-          },
-          read: {
-            status: selectRes.status,
-            url: selectUrl,
-            count: rows.length,
-            rows,
-          },
-        },
-        null,
-        2
-      ),
+      body: JSON.stringify({
+        ok: true,
+        logs: Array.isArray(data) ? data : [],
+      }),
     };
   } catch (err) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         ok: false,
-        step: "catch",
         error: err.message,
       }),
     };
