@@ -326,47 +326,73 @@
       setStatus("Ready.");
     }
 
-    async function loadActivityLogs() {
-      const statusEl = document.getElementById("logs-status");
-      const container = document.getElementById("logs-container");
-      if (!statusEl || !container) return;
+   async function loadActivityLogs() {
+  const statusEl = document.getElementById("logs-status");
+  const container = document.getElementById("logs-container");
+  if (!statusEl || !container) return;
 
-      statusEl.textContent = "Loading...";
-      container.innerHTML = "";
+  statusEl.textContent = "Loading...";
+  container.innerHTML = "";
 
-      try {
-        const res = await fetch("/.netlify/functions/get-logs");
-        const data = await res.json();
+  try {
+    const res = await fetch("/.netlify/functions/get-logs");
+    const data = await res.json();
 
-        if (!data.ok) {
-          statusEl.textContent = "Could not load logs.";
-          container.innerHTML = `<pre class="error-banner">${JSON.stringify(data, null, 2)}</pre>`;
-          return;
+    // ✅ tolerate both {logs: [...]} or {data: [...]}
+    const logs = data.logs || data.data || [];
+
+    statusEl.textContent = `Loaded ${logs.length} log(s).`;
+
+    if (!logs.length) {
+      container.innerHTML = `<p class="text-sm text-slate-400">No logs yet.</p>`;
+      return;
+    }
+
+    logs.forEach((row) => {
+      const div = document.createElement("div");
+      div.className =
+        "rounded border border-slate-700 bg-slate-900/40 p-3 mb-2 text-sm";
+      div.innerHTML = `
+        <div class="font-medium text-slate-100">${row.action || "unknown"}</div>
+        <div class="text-xs text-slate-400">${row.created_at || ""}</div>
+        ${
+          row.topic
+            ? `<div class="mt-1 text-slate-200">${row.topic}</div>`
+            : ""
         }
-
-        const logs = data.data;
-        statusEl.textContent = `Loaded ${logs.length} log(s).`;
-
-        if (!logs.length) {
-          container.innerHTML = `<p style="color:var(--muted);">No logs yet.</p>`;
-          return;
+        ${
+          row.caption
+            ? `<div class="mt-1 text-slate-300">${row.caption}</div>`
+            : ""
         }
+        ${
+          row.status
+            ? `<div class="mt-1"><span class="text-xs px-2 py-0.5 rounded bg-slate-800/60">${row.status}</span></div>`
+            : ""
+        }
+        ${
+          row.provider
+            ? `<span class="ml-2 text-[10px] text-slate-400">${row.provider}</span>`
+            : ""
+        }
+        ${
+          row.raw
+            ? `<pre class="mt-2 text-[10px] text-slate-200 bg-black/30 p-2 rounded overflow-auto">${JSON.stringify(
+                row.raw,
+                null,
+                2
+              )}</pre>`
+            : ""
+        }
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    statusEl.textContent = "Error loading logs.";
+    container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${err}</pre>`;
+  }
+}
 
-        logs.forEach((row) => {
-          const div = document.createElement("div");
-          div.className = "panel";
-          div.style.padding = "0.75rem";
-          div.innerHTML = `
-            <div style="font-size:0.85rem;color:var(--fg);">${row.action || "unknown"} (${row.created_at || ""})</div>
-            <div style="font-size:0.75rem;color:var(--muted);">${row.topic || ""}</div>
-            <div style="font-size:0.8rem;">${row.caption || ""}</div>
-          `;
-          container.appendChild(div);
-        });
-      } catch (err) {
-        statusEl.textContent = "Error loading logs.";
-        container.innerHTML = `<pre class="error-banner">${err}</pre>`;
-      }
     }
 
     // ---------- startup ----------
