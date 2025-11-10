@@ -1,4 +1,37 @@
 // netlify/functions/generate-and-post.js
+// --- activity logging helper ---
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE;
+
+async function logActivity(entry) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) {
+    console.log("logActivity: missing env vars, skipping", entry);
+    return;
+  }
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/activity_logs`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        action: entry.action,
+        topic: entry.topic || "",
+        caption: entry.caption || "",
+        status: entry.status || "ok",
+        provider: entry.provider || "netlify",
+        raw: entry.raw ?? null,
+      }),
+    });
+  } catch (err) {
+    console.error("logActivity failed:", err);
+  }
+}
+// --- end logging helper ---
 
 export async function handler(event, context) {
   // only allow POST
