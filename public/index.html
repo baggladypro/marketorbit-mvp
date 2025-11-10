@@ -1,407 +1,393 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MarketOrbit MVP</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --fg: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --error: #ef4444;
-      --panel: #1e293b;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <title>MarketOrbit MVP</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #131c30;
+        --panel-dark: #101827;
+        --fg: #e2e8f0;
+        --muted: rgba(226, 232, 240, 0.6);
+        --accent: #0ea5e9;
+        --success: #166534;
+        --danger: #b91c1c;
+        --border: rgba(148, 163, 184, 0.28);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+      }
+      header {
+        height: 54px;
+        background: #0f172a;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .brand {
+        font-weight: 600;
+        color: var(--accent);
+      }
+      nav {
+        display: flex;
+        gap: 1rem;
+      }
+      nav button {
+        background: none;
+        border: none;
+        color: var(--fg);
+        font: inherit;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: 0.15s ease;
+      }
+      nav button.active,
+      nav button:hover {
+        background: rgba(14, 165, 233, 0.12);
+        color: #fff;
+      }
+      main {
+        max-width: 1080px;
+        margin: 1.5rem auto 3.5rem;
+        padding: 0 1.5rem;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 1rem;
+        padding: 1.3rem 1.5rem 1.3rem;
+        margin-bottom: 1.2rem;
+      }
+      h1,
+      h2,
+      h3 {
+        margin-top: 0;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .two-col {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 1.25rem;
+      }
+      .btn {
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 0.45rem;
+        padding: 0.45rem 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      .btn.secondary {
+        background: rgba(148, 163, 184, 0.14);
+      }
+      textarea,
+      input[type="text"] {
+        width: 100%;
+        background: rgba(15, 23, 42, 0.3);
+        border: 1px solid rgba(148, 163, 184, 0.24);
+        border-radius: 0.4rem;
+        padding: 0.45rem 0.55rem;
+        color: #fff;
+        font: inherit;
+      }
+      textarea {
+        min-height: 140px;
+      }
+      .status-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30px;
+        background: #0f172a;
+        border-top: 1px solid rgba(148, 163, 184, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+      .logs-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+      }
+      .log-item {
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 0.65rem;
+        background: rgba(15, 23, 42, 0.4);
+        padding: 0.55rem 0.75rem;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.1rem 0.55rem;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        background: rgba(148, 163, 184, 0.2);
+      }
+      pre {
+        background: rgba(15, 23, 42, 0.3);
+        padding: 0.35rem 0.4rem;
+        border-radius: 0.4rem;
+        overflow-x: auto;
+      }
+      @media (max-width: 880px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+        header {
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          height: auto;
+          padding-top: 0.75rem;
+          padding-bottom: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">MarketOrbit MVP</div>
+      <nav>
+        <button data-view="dashboard" class="active">Dashboard</button>
+        <button data-view="content">Content / AI</button>
+        <button data-view="scheduler">Scheduler</button>
+        <button data-view="activity">Activity</button>
+      </nav>
+    </header>
+    <main id="app">
+      <!-- dashboard will be rendered by JS -->
+    </main>
+    <div class="status-bar" id="status-bar">Ready.</div>
 
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-    }
+    <script>
+      const app = document.getElementById("app");
+      const statusBar = document.getElementById("status-bar");
 
-    header {
-      background: #1e293b;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--accent);
-    }
-
-    nav button {
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-left: 1rem;
-      cursor: pointer;
-    }
-
-    nav button.active {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .panel {
-      background: var(--panel);
-      padding: 1.2rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
-    }
-
-    .two-col {
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      margin-top: 1rem;
-    }
-
-    button.primary {
-      background: var(--accent);
-      border: none;
-      padding: 0.6rem 1rem;
-      color: #000;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    button.secondary {
-      background: #334155;
-      border: none;
-      padding: 0.6rem 1rem;
-      color: var(--fg);
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: var(--fg);
-      margin-top: 0.25rem;
-    }
-
-    pre {
-      white-space: pre-wrap;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.5rem;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      color: #e2e8f0;
-      overflow-x: auto;
-    }
-
-    .success-banner {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-      padding: 0.5rem;
-      border-radius: 6px;
-      margin-bottom: 0.5rem;
-      color: #4ade80;
-    }
-
-    .error-banner {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      padding: 0.5rem;
-      border-radius: 6px;
-      margin-bottom: 0.5rem;
-      color: #f87171;
-    }
-
-    footer {
-      text-align: center;
-      font-size: 0.8rem;
-      padding: 1rem;
-      color: var(--muted);
-      opacity: 0.6;
-    }
-
-    #status-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e293b;
-      color: var(--accent);
-      text-align: center;
-      padding: 0.3rem;
-      font-size: 0.8rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  </style>
-</head>
-
-<body>
-  <header>
-    <h1>MarketOrbit MVP</h1>
-    <nav>
-      <button data-view="dashboard" class="active">Dashboard</button>
-      <button data-view="content">Content / AI</button>
-      <button data-view="scheduler">Scheduler</button>
-      <button data-view="activity">Activity</button>
-    </nav>
-  </header>
-
-  <main id="main-view" style="padding: 1.5rem;"></main>
-  <div id="status-bar">Ready.</div>
-
-  <footer>
-    <p>© 2025 MarketOrbit by Aision Labs • All rights reserved.</p>
-  </footer>
-
-  <!-- ========== SCRIPT SECTION ========== -->
-  <script>
-    // ---------- helpers ----------
-    function setStatus(msg) {
-      const el = document.getElementById("status-bar");
-      if (el) el.textContent = msg;
-    }
-
-    let currentUser = null;
-    const saved = localStorage.getItem("mo_user");
-    if (saved) {
-      try { currentUser = JSON.parse(saved); } catch (e) { currentUser = null; }
-    }
-
-    // ---------- renderer ----------
-    function render(view) {
-      const main = document.getElementById("main-view");
-      const navButtons = document.querySelectorAll("nav button");
-      navButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
-
-      // Dashboard
-      if (view === "dashboard") {
-        main.innerHTML = `
-          <div class="panel">
-            <h2>Welcome ${currentUser ? currentUser.email : "Guest"}</h2>
-            <p style="font-size:0.85rem;color:var(--muted);">
-              This is your MarketOrbit MVP — generate content, test posting, and review activity logs.
-            </p>
-          </div>
-          <div class="two-col">
-            <div class="panel">
-              <h2>Quick Actions</h2>
-              <button class="primary" onclick="render('content')">Generate content</button>
-              <button class="secondary" onclick="render('scheduler')">View scheduler</button>
-              <button class="secondary" onclick="render('activity')">See activity</button>
-            </div>
-            <div class="panel">
-              <h2>Recent Activity</h2>
-              <div id="recent-activity" style="font-size:0.75rem;color:var(--muted);">No activity yet.</div>
-            </div>
-          </div>`;
-        renderActivityList("recent-activity", 5);
-        return;
+      function setStatus(msg) {
+        if (statusBar) statusBar.textContent = msg;
       }
 
-      // Content view
-      if (view === "content") {
-        main.innerHTML = `
-          <div class="panel">
-            <h2>Content / AI Studio</h2>
-            <p>Enter a topic and let AI generate or post content for you.</p>
-            <label>Topic / Idea</label>
-            <input id="topic-input" placeholder="e.g. Reels tips for wellness brands" />
-            <div style="margin-top:1rem;display:flex;gap:.5rem;">
-              <button class="primary" onclick="generateDraft()">Generate draft</button>
-              <button class="secondary" onclick="generateAndPost()">Generate & Post</button>
-            </div>
-            <div id="content-result" style="margin-top:1rem;"></div>
-          </div>`;
-        return;
+      function setActiveNav(view) {
+        document.querySelectorAll("nav button").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.view === view);
+        });
       }
 
-      // Scheduler placeholder
-      if (view === "scheduler") {
-        main.innerHTML = `
-          <div class="panel">
-            <h2>Scheduler</h2>
-            <p class="muted">Scheduling tools coming soon.</p>
-          </div>`;
-        return;
+      async function render(view) {
+        setActiveNav(view);
+        if (view === "dashboard") {
+          app.innerHTML = `
+            <section class="panel">
+              <h2>Welcome Guest</h2>
+              <p class="muted">This is your MarketOrbit MVP — generate content, test posting, and review activity logs.</p>
+            </section>
+            <section class="two-col">
+              <div class="panel">
+                <h3>Quick Actions</h3>
+                <p class="muted">Jump to a tool.</p>
+                <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+                  <button class="btn" onclick="render('content')">Generate content</button>
+                  <button class="btn secondary" onclick="render('scheduler')">View scheduler</button>
+                  <button class="btn secondary" onclick="render('activity')">See activity</button>
+                </div>
+              </div>
+              <div class="panel">
+                <h3>Recent Activity</h3>
+                <p class="muted">No activity yet.</p>
+              </div>
+            </section>
+          `;
+        } else if (view === "content") {
+          app.innerHTML = `
+            <section class="panel">
+              <h2>Content / AI Studio</h2>
+              <p class="muted">Enter a topic and let AI generate or post content for you.</p>
+              <div style="margin-top:1rem;">
+                <label class="muted" for="topic-input">Topic / Idea</label>
+                <input id="topic-input" type="text" placeholder="e.g. Reels tips for wellness brands" />
+              </div>
+              <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+                <button class="btn" onclick="generateDraft()">Generate draft</button>
+                <button class="btn secondary" onclick="generateAndPost()">Generate &amp; Post</button>
+              </div>
+              <div id="content-result" style="margin-top:1rem;"></div>
+            </section>
+          `;
+        } else if (view === "scheduler") {
+          app.innerHTML = `
+            <section class="panel">
+              <h2>Scheduler</h2>
+              <p class="muted">This is a placeholder for your scheduling UI.</p>
+            </section>
+          `;
+        } else if (view === "activity") {
+          app.innerHTML = `
+            <section class="panel">
+              <h2>Activity / Logs</h2>
+              <p class="muted">Loaded from <code>/.netlify/functions/get-logs</code></p>
+              <p id="logs-status" class="muted" style="margin-top:0.75rem;">Loading...</p>
+              <div id="logs-container" class="logs-list" style="margin-top:0.75rem;"></div>
+            </section>
+          `;
+          // now fetch logs
+          loadActivityLogs();
+        }
       }
 
-      // Activity view
-      if (view === "activity") {
-        main.innerHTML = `
-          <div class="panel">
-            <h2>Activity / Logs</h2>
-            <p style="font-size:0.8rem;color:var(--muted);">
-              Loaded from <code>/.netlify/functions/get-logs</code>
-            </p>
-            <p id="logs-status">Loading...</p>
-            <div id="logs-container" style="margin-top:1rem;"></div>
-          </div>`;
-        loadActivityLogs();
-        return;
+      // ---------- content actions ----------
+      async function generateDraft() {
+        const topic =
+          document.getElementById("topic-input").value ||
+          "Sample post from MarketOrbit MVP";
+        setStatus("Generating draft...");
+        const out = document.getElementById("content-result");
+        out.innerHTML = "";
+        try {
+          const res = await fetch("/.netlify/functions/generate-and-post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic, mode: "draft" }),
+          });
+          const data = await res.json();
+          if (data.ok) {
+            out.innerHTML = `
+              <div style="background:rgba(22,101,52,0.15);border:1px solid rgba(22,101,52,0.4);border-radius:0.6rem;padding:0.6rem 0.7rem;margin-bottom:0.5rem;">Draft generated ✅</div>
+              <div style="background:rgba(15,23,42,0.3);border:1px solid rgba(148,163,184,0.12);border-radius:0.4rem;padding:0.55rem 0.6rem;font-size:0.8rem;white-space:pre-wrap;">${data.caption}</div>
+            `;
+          } else {
+            out.innerHTML = `<div style="background:rgba(185,28,28,0.12);border:1px solid rgba(185,28,28,0.35);border-radius:0.5rem;padding:0.6rem;">${data.message ||
+              "Draft failed"}</div>`;
+          }
+        } catch (err) {
+          out.innerHTML = `<div style="background:rgba(185,28,28,0.12);border:1px solid rgba(185,28,28,0.35);border-radius:0.5rem;padding:0.6rem;">Error: ${err}</div>`;
+        }
+        setStatus("Ready.");
       }
-    }
 
-    // ---------- activity helpers ----------
-    let activityLog = [];
-    function addActivity(entry) {
-      const row = {
-        title: entry.title || "Activity",
-        detail: entry.detail || null,
-        time: new Date().toISOString(),
-      };
-      activityLog.unshift(row);
-    }
-
-    function renderActivityList(elId, limit) {
-      const el = document.getElementById(elId);
-      if (!el) return;
-      const items = limit ? activityLog.slice(0, limit) : activityLog;
-      if (!items.length) {
-        el.innerHTML = `<p style="color:var(--muted);">No activity yet.</p>`;
-        return;
+      async function generateAndPost() {
+        const topic =
+          document.getElementById("topic-input").value ||
+          "Sample post from MarketOrbit MVP";
+        setStatus("Generating and posting...");
+        const out = document.getElementById("content-result");
+        out.innerHTML = "";
+        try {
+          const res = await fetch("/.netlify/functions/generate-and-post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic, mode: "post" }),
+          });
+          const data = await res.json();
+          if (data.ok) {
+            out.innerHTML = `
+              <div style="background:rgba(22,101,52,0.15);border:1px solid rgba(22,101,52,0.4);border-radius:0.6rem;padding:0.6rem 0.7rem;margin-bottom:0.5rem;">
+                ${data.stage === "post-to-facebook" ? "Posted to Facebook ✅" : "Generated ✅"}
+              </div>
+              <pre style="font-size:0.75rem;">${JSON.stringify(data, null, 2)}</pre>
+            `;
+          } else {
+            out.innerHTML = `<div style="background:rgba(185,28,28,0.12);border:1px solid rgba(185,28,28,0.35);border-radius:0.5rem;padding:0.6rem;">${data.message ||
+              "Post failed"}</div>`;
+          }
+        } catch (err) {
+          out.innerHTML = `<div style="background:rgba(185,28,28,0.12);border:1px solid rgba(185,28,28,0.35);border-radius:0.5rem;padding:0.6rem;">Error: ${err}</div>`;
+        }
+        setStatus("Ready.");
       }
-      el.innerHTML = items.map(
-        (a) => `
-        <div style="padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-          <div style="font-size:0.7rem;color:var(--muted);">${a.time}</div>
-          <div style="font-size:0.8rem;">${a.title}</div>
-          ${a.detail ? `<pre>${JSON.stringify(a.detail, null, 2)}</pre>` : ""}
-        </div>`
-      ).join("");
-    }
 
-    // ---------- Netlify functions ----------
-    async function generateDraft() {
-      const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
-      setStatus("Generating draft...");
-      const out = document.getElementById("content-result");
-      out.innerHTML = "";
+      // ---------- activity fetch ----------
+      async function loadActivityLogs() {
+        const statusEl = document.getElementById("logs-status");
+        const container = document.getElementById("logs-container");
+        if (!statusEl || !container) return;
+        statusEl.textContent = "Loading...";
+        container.innerHTML = "";
 
-      const res = await fetch("/.netlify/functions/generate-and-post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, mode: "draft" }),
+        try {
+          const res = await fetch("/.netlify/functions/get-logs");
+          const data = await res.json();
+
+          // tolerate {logs: []} or {data: []}
+          const rows = Array.isArray(data.logs)
+            ? data.logs
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+          statusEl.textContent = `Loaded ${rows.length} log(s).`;
+
+          if (!rows.length) {
+            container.innerHTML =
+              '<p class="muted" style="margin:0;">No logs yet.</p>';
+            return;
+          }
+
+          container.innerHTML = rows
+            .map((row) => {
+              return `
+                <div class="log-item">
+                  <div style="display:flex;justify-content:space-between;gap:0.5rem;">
+                    <div><strong>${row.action || "unknown"}</strong></div>
+                    <span class="badge">${row.status || "ok"}</span>
+                  </div>
+                  ${
+                    row.topic
+                      ? `<div class="muted" style="margin-top:0.3rem;">${row.topic}</div>`
+                      : ""
+                  }
+                  ${
+                    row.caption
+                      ? `<div style="margin-top:0.25rem;font-size:0.78rem;">${row.caption}</div>`
+                      : ""
+                  }
+                  ${
+                    row.provider
+                      ? `<div class="muted" style="margin-top:0.25rem;">via ${row.provider}</div>`
+                      : ""
+                  }
+                  ${
+                    row.created_at
+                      ? `<div class="muted" style="margin-top:0.25rem;font-size:0.68rem;">${row.created_at}</div>`
+                      : ""
+                  }
+                </div>
+              `;
+            })
+            .join("");
+        } catch (err) {
+          statusEl.textContent = "Error loading logs.";
+          container.innerHTML = `<pre>${err}</pre>`;
+        }
+      }
+
+      // ---------- startup ----------
+      document.addEventListener("DOMContentLoaded", () => {
+        document.querySelectorAll("nav button").forEach((btn) => {
+          btn.addEventListener("click", () => render(btn.dataset.view));
+        });
+        render("dashboard");
       });
-
-      const data = await res.json();
-      if (data.ok) {
-        out.innerHTML = `<div class="success-banner">Draft generated ✅</div><pre>${data.caption}</pre>`;
-        addActivity({ title: "Draft generated", detail: data });
-      } else {
-        out.innerHTML = `<div class="error-banner">${data.message || "Draft failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        addActivity({ title: "Draft failed", detail: data });
-      }
-      setStatus("Ready.");
-    }
-
-    async function generateAndPost() {
-      const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
-      setStatus("Posting to Facebook...");
-      const out = document.getElementById("content-result");
-      out.innerHTML = "";
-
-      const res = await fetch("/.netlify/functions/generate-and-post", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, mode: "post" }),
-      });
-
-      const data = await res.json();
-      if (data.ok) {
-        out.innerHTML = `<div class="success-banner">Posted to Facebook ✅</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        addActivity({ title: "Posted to Facebook", detail: data });
-      } else {
-        out.innerHTML = `<div class="error-banner">${data.message || "Post failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-        addActivity({ title: "Post failed", detail: data });
-      }
-      setStatus("Ready.");
-    }
-
-   async function loadActivityLogs() {
-  const statusEl = document.getElementById("logs-status");
-  const container = document.getElementById("logs-container");
-  if (!statusEl || !container) return;
-
-  statusEl.textContent = "Loading...";
-  container.innerHTML = "";
-
-  try {
-    const res = await fetch("/.netlify/functions/get-logs");
-    const data = await res.json();
-
-    // ✅ tolerate both {logs: [...]} or {data: [...]}
-    const logs = data.logs || data.data || [];
-
-    statusEl.textContent = `Loaded ${logs.length} log(s).`;
-
-    if (!logs.length) {
-      container.innerHTML = `<p class="text-sm text-slate-400">No logs yet.</p>`;
-      return;
-    }
-
-    logs.forEach((row) => {
-      const div = document.createElement("div");
-      div.className =
-        "rounded border border-slate-700 bg-slate-900/40 p-3 mb-2 text-sm";
-      div.innerHTML = `
-        <div class="font-medium text-slate-100">${row.action || "unknown"}</div>
-        <div class="text-xs text-slate-400">${row.created_at || ""}</div>
-        ${
-          row.topic
-            ? `<div class="mt-1 text-slate-200">${row.topic}</div>`
-            : ""
-        }
-        ${
-          row.caption
-            ? `<div class="mt-1 text-slate-300">${row.caption}</div>`
-            : ""
-        }
-        ${
-          row.status
-            ? `<div class="mt-1"><span class="text-xs px-2 py-0.5 rounded bg-slate-800/60">${row.status}</span></div>`
-            : ""
-        }
-        ${
-          row.provider
-            ? `<span class="ml-2 text-[10px] text-slate-400">${row.provider}</span>`
-            : ""
-        }
-        ${
-          row.raw
-            ? `<pre class="mt-2 text-[10px] text-slate-200 bg-black/30 p-2 rounded overflow-auto">${JSON.stringify(
-                row.raw,
-                null,
-                2
-              )}</pre>`
-            : ""
-        }
-      `;
-      container.appendChild(div);
-    });
-  } catch (err) {
-    statusEl.textContent = "Error loading logs.";
-    container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${err}</pre>`;
-  }
-}
-
-    }
-
-    // ---------- startup ----------
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll("[data-view]").forEach((btn) => {
-        btn.addEventListener("click", () => render(btn.dataset.view));
-      });
-      render("dashboard");
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
