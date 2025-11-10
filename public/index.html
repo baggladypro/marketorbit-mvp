@@ -1,509 +1,271 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>MarketOrbit – MVP Console</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      :root {
-        --bg: #0f172a;
-        --panel: #111827;
-        --panel2: #0f141b;
-        --border: #243047;
-        --text: #ffffff;
-        --muted: #cbd5f5;
-        --accent: #22c55e;
-        --accent2: #38bdf8;
-      }
-      body {
-        background: var(--bg);
-        color: var(--text);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      header {
-        backdrop-filter: blur(10px);
-        background: rgba(15, 23, 42, 0.6);
-        border-bottom: 1px solid rgba(36, 48, 71, 0.6);
-        padding: 0.75rem 1.25rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .app-title {
-        font-weight: 700;
-        letter-spacing: -0.02em;
-      }
-      .top-actions button {
-        background: transparent;
-        border: 1px solid rgba(203, 213, 245, 0.2);
-        color: #fff;
-        border-radius: 999px;
-        padding: 0.4rem 0.9rem;
-        cursor: pointer;
-        margin-left: 0.4rem;
-        font-size: 0.75rem;
-      }
-      main {
-        display: flex;
-        flex: 1;
-        min-height: 0;
-      }
-      nav {
-        width: 210px;
-        border-right: 1px solid rgba(36, 48, 71, 0.5);
-        padding: 1rem 0.75rem;
-        background: rgba(15, 23, 42, 0.4);
-      }
-      nav button {
-        display: block;
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: none;
-        color: var(--muted);
-        padding: 0.45rem 0.6rem;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.8rem;
-      }
-      nav button.active,
-      nav button:hover {
-        background: rgba(56, 189, 248, 0.12);
-        color: #fff;
-      }
-      .content {
-        flex: 1;
-        padding: 1rem 1.5rem 3.5rem;
-        overflow-y: auto;
-      }
-      .panel {
-        background: var(--panel);
-        border: 1px solid rgba(36, 48, 71, 0.4);
-        border-radius: 1rem;
-        padding: 1rem;
-        margin-bottom: 1rem;
-      }
-      .panel h2 {
-        margin-top: 0;
-        font-size: 1rem;
-      }
-      input, textarea, select {
-        background: rgba(15, 23, 42, 0.3);
-        border: 1px solid rgba(203, 213, 245, 0.18);
-        border-radius: 0.5rem;
-        padding: 0.4rem 0.5rem;
-        color: #fff;
-        width: 100%;
-      }
-      label {
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: rgba(203, 213, 245, 0.75);
-        display: block;
-        margin-bottom: 0.35rem;
-      }
-      button.primary {
-        background: var(--accent2);
-        border: none;
-        border-radius: 0.6rem;
-        padding: 0.45rem 0.85rem;
-        color: #000;
-        font-weight: 600;
-        cursor: pointer;
-      }
-      button.secondary {
-        background: rgba(15, 23, 42, 0.2);
-        border: 1px solid rgba(203, 213, 245, 0.2);
-        border-radius: 0.6rem;
-        padding: 0.45rem 0.85rem;
-        color: #fff;
-        cursor: pointer;
-      }
-      .two-col {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1rem;
-      }
-      pre {
-        background: #020617;
-        border-radius: 0.6rem;
-        padding: 0.7rem;
-        font-size: 0.7rem;
-        overflow-x: auto;
-      }
-      .error-banner {
-        background: rgba(248, 113, 113, 0.12);
-        border: 1px solid rgba(248, 113, 113, 0.3);
-        color: #fee2e2;
-        border-radius: 0.5rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.7rem;
-        margin-bottom: 0.4rem;
-      }
-      .success-banner {
-        background: rgba(34, 197, 94, 0.09);
-        border: 1px solid rgba(34, 197, 94, 0.25);
-        color: #ecfdf3;
-        border-radius: 0.5rem;
-        padding: 0.4rem 0.6rem;
-        font-size: 0.7rem;
-        margin-bottom: 0.4rem;
-      }
-      .calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, minmax(70px, 1fr));
-        gap: 0.3rem;
-      }
-      .calendar-cell {
-        background: rgba(15, 23, 42, 0.4);
-        border: 1px solid rgba(36, 48, 71, 0.3);
-        border-radius: 0.4rem;
-        min-height: 65px;
-        padding: 0.25rem;
-        font-size: 0.6rem;
-      }
-      footer {
-        position: fixed;
-        bottom: 0;
-        left: 210px;
-        right: 0;
-        background: rgba(15, 23, 42, 0.9);
-        border-top: 1px solid rgba(36, 48, 71, 0.4);
-        padding: 0.4rem 1rem;
-        font-size: 0.65rem;
-        display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-      }
-
-      @media (max-width: 768px) {
-        main {
-          flex-direction: column;
-        }
-        nav {
-          width: 100%;
-          display: flex;
-          gap: 0.5rem;
-          overflow-x: auto;
-        }
-        footer {
-          left: 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div>
-        <div class="app-title">MarketOrbit</div>
-        <div style="font-size:0.65rem;color:rgba(203,213,245,0.5);">by Aision Labs • multi-brand social ops</div>
-      </div>
-      <div class="top-actions">
-        <button id="fake-login-btn">Login</button>
-        <button id="fake-register-btn">Create account</button>
-      </div>
-    </header>
-    <main>
-      <nav>
-        <button class="active" data-view="dashboard">📊 Dashboard</button>
-        <button data-view="content">🪄 Content / AI</button>
-        <button data-view="scheduler">🗓 Scheduler</button>
-        <button data-view="activity">📜 Activity / Errors</button>
-        <button data-view="settings">⚙️ Settings</button>
-      </nav>
-      <div class="content" id="app-content">
-        <!-- content rendered by JS -->
-      </div>
-    </main>
-    <footer>
-      <div id="status-bar">Ready.</div>
-      <div>Env: Netlify • FB test • Supabase optional</div>
-    </footer>
-
-    <script>
-      // simple in-browser "auth" for testing
-      let currentUser = localStorage.getItem("mo_user") ? JSON.parse(localStorage.getItem("mo_user")) : null;
-      let activityLog = [];
-
-      function setStatus(msg) {
-        document.getElementById("status-bar").textContent = msg;
-      }
-
-      function addActivity(entry) {
-        activityLog.unshift({
-          time: new Date().toISOString(),
-          ...entry,
-        });
-      }
-
-      // ----- views -----
-      const contentEl = document.getElementById("app-content");
-      function render(view) {
-        // highlight nav
-        document.querySelectorAll("nav button").forEach((b) => {
-          b.classList.toggle("active", b.dataset.view === view);
-        });
-
-        if (view === "dashboard") {
-          contentEl.innerHTML = `
-            <div class="panel">
-              <h2>Welcome ${currentUser ? currentUser.email : "Guest"}</h2>
-              <p style="font-size:0.8rem;color:var(--muted);">This is your MarketOrbit MVP. Generate content, test posting, and review errors.</p>
-            </div>
-            <div class="two-col">
-              <div class="panel">
-                <h2>Quick Actions</h2>
-                <button class="primary" onclick="render('content')">Generate content</button>
-                <button class="secondary" onclick="render('scheduler')">View scheduler</button>
-                <button class="secondary" onclick="render('activity')">See activity</button>
-              </div>
-              <div class="panel">
-                <h2>Recent Activity</h2>
-                <div id="recent-activity" style="font-size:0.7rem;"></div>
-              </div>
-            </div>
-          `;
-          renderActivityList("recent-activity", 5);
-        }
-
-        if (view === "content") {
-          contentEl.innerHTML = `
-            <div class="panel">
-              <h2>Content / AI Studio</h2>
-              <p style="font-size:0.7rem;color:var(--muted);margin-bottom:0.7rem;">Enter a topic, generate a post (AI if key present), then optionally send to Facebook.</p>
-              <label>Topic / idea</label>
-              <input id="topic-input" placeholder="e.g. Reels tips for wellness brands" />
-              <div style="margin-top:0.6rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-                <button class="primary" onclick="generateDraft()">Generate draft</button>
-                <button class="secondary" onclick="generateAndPost()">Generate & post to Facebook</button>
-              </div>
-              <div id="content-result" style="margin-top:0.8rem;"></div>
-            </div>
-          `;
-        }
-
-        if (view === "scheduler") {
-          contentEl.innerHTML = `
-            <div class="panel">
-              <h2>Scheduler (mock)</h2>
-              <p style="font-size:0.7rem;color:var(--muted);">This is a visual placeholder so you can test the user flow before real scheduling.</p>
-              <div class="calendar-grid">
-                ${Array.from({length: 14}).map((_,i)=>`<div class="calendar-cell">Day ${i+1}<div style="margin-top:0.25rem;font-size:0.55rem;color:rgba(203,213,245,0.8);">0 posts</div></div>`).join("")}
-              </div>
-            </div>
-          `;
-        }
-if (view === "activity") {
-  contentEl.innerHTML = `
-    <div class="panel">
-      <h2>Activity / Errors</h2>
-      <p class="text-sm text-slate-300 mb-4">
-        Latest actions from MarketOrbit (AI drafts, Facebook posts, and error logs).
-      </p>
-      <div class="flex gap-2 mb-4">
-        <button id="load-logs-btn" class="px-3 py-2 rounded bg-sky-500 text-white text-sm">
-          Refresh logs
-        </button>
-        <span id="logs-status" class="text-xs text-slate-400"></span>
-      </div>
-      <div id="logs-container" class="space-y-3"></div>
-    </div>
-  `;
-
-  // Call the log loader when the Activity view is opened
-  loadActivityLogs();
+<script>
+// ------------------ tiny helpers ------------------
+function setStatus(msg) {
+  const el = document.getElementById("status-bar");
+  if (el) el.textContent = msg;
 }
 
-        if (view === "activity") {
-          contentEl.innerHTML = `
-            <div class="panel">
-              <h2>Activity / Errors</h2>
-              <p style="font-size:0.7rem;color:var(--muted);">Every time you call the function, we log the result here.</p>
-              <div id="activity-list"></div>
-            </div>
-          `;
-          renderActivityList("activity-list");
-        }
-
-        if (view === "settings") {
-          contentEl.innerHTML = `
-            <div class="panel">
-              <h2>Settings / Account</h2>
-              <p style="font-size:0.7rem;color:var(--muted);">This is just front-end for now. Real auth will come later.</p>
-              <div style="margin-top:0.6rem;">
-                <label>Email</label>
-                <input id="acct-email" value="${currentUser ? currentUser.email : ""}" placeholder="you@example.com" />
-                <button class="primary" style="margin-top:0.5rem;" onclick="saveAccount()">Save</button>
-              </div>
-            </div>
-          `;
-        }
-
-      }
-
-      function renderActivityList(elId, limit) {
-        const el = document.getElementById(elId);
-        if (!el) return;
-        const items = limit ? activityLog.slice(0, limit) : activityLog;
-        if (!items.length) {
-          el.innerHTML = `<p style="font-size:0.7rem;color:var(--muted);">No activity yet.</p>`;
-          return;
-        }
-        el.innerHTML = items.map(a => `
-          <div style="border-bottom:1px solid rgba(36,48,71,0.3);padding:0.35rem 0;">
-            <div style="font-size:0.65rem;color:rgba(203,213,245,0.5);">${a.time}</div>
-            <div style="font-size:0.75rem;">${a.title}</div>
-            ${a.detail ? `<pre>${JSON.stringify(a.detail, null, 2)}</pre>` : ""}
-          </div>
-        `).join("");
-      }
-
-      // ---- actions ----
-      async function generateDraft() {
-        const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
-        setStatus("Generating draft...");
-        const out = document.getElementById("content-result");
-        out.innerHTML = "";
-        const res = await fetch("/.netlify/functions/generate-and-post", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, mode: "draft" }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-          out.innerHTML = `<div class="success-banner">Draft generated.</div><pre>${data.caption}</pre>`;
-          addActivity({ title: "Draft generated", detail: data });
-        } else {
-          out.innerHTML = `<div class="error-banner">${data.message || "Draft failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-          addActivity({ title: "Draft failed", detail: data });
-        }
-        setStatus("Ready.");
-      }
-
-      async function generateAndPost() {
-        const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
-        setStatus("Generating and posting to Facebook...");
-        const out = document.getElementById("content-result");
-        out.innerHTML = "";
-        const res = await fetch("/.netlify/functions/generate-and-post", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ topic, mode: "post" }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-          out.innerHTML = `<div class="success-banner">Posted to Facebook ✅</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-          addActivity({ title: "Posted to Facebook", detail: data });
-        } else {
-          out.innerHTML = `<div class="error-banner">${data.message || "Post failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
-          addActivity({ title: "Post to Facebook failed", detail: data });
-        }
-        setStatus("Ready.");
-      }
-
-      function saveAccount() {
-        const emailEl = document.getElementById("acct-email");
-        const email = emailEl.value.trim();
-        if (!email) return;
-        currentUser = { email };
-        localStorage.setItem("mo_user", JSON.stringify(currentUser));
-        setStatus("Account saved locally.");
-      }
-
-      // nav clicks
-      document.querySelectorAll("nav button").forEach((b) => {
-        b.addEventListener("click", () => render(b.dataset.view));
-      });
-      document.getElementById("fake-login-btn").onclick = () => {
-        currentUser = { email: "demo@marketorbit.app" };
-        localStorage.setItem("mo_user", JSON.stringify(currentUser));
-        setStatus("Logged in (local only).");
-        render("dashboard");
-      };
-      document.getElementById("fake-register-btn").onclick = () => {
-        currentUser = { email: "newuser@marketorbit.app" };
-        localStorage.setItem("mo_user", JSON.stringify(currentUser));
-        setStatus("Account created (local only).");
-        render("dashboard");
-      };
-  // initial
-  render("dashboard");
-
-  // 👇 Add this code block RIGHT ABOVE the closing </script>
-  async function loadActivityLogs() {
-    const statusEl = document.getElementById("logs-status");
-    const container = document.getElementById("logs-container");
-    if (!statusEl || !container) return;
-
-    statusEl.textContent = "Loading...";
-    container.innerHTML = "";
-
-    try {
-      const res = await fetch("/.netlify/functions/get-logs");
-      const data = await res.json();
-
-      if (!data.ok) {
-        statusEl.textContent = "Could not load logs.";
-        container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${JSON.stringify(data, null, 2)}</pre>`;
-        return;
-      }
-
-      const logs = data.data;
-      statusEl.textContent = `Loaded ${logs.length} log(s).`;
-
-      if (!logs.length) {
-        container.innerHTML = `<p class="text-sm text-slate-400">No logs yet.</p>`;
-        return;
-      }
-
-      logs.forEach((row) => {
-        const div = document.createElement("div");
-        div.className = "rounded border border-slate-700 bg-slate-900/40 p-3";
-        div.innerHTML = `
-          <div class="flex items-center justify-between gap-3 mb-2">
-            <span class="text-xs uppercase tracking-wide text-slate-300">${row.action || "unknown"}</span>
-            <span class="text-[10px] text-slate-500">${row.created_at || ""}</span>
-          </div>
-          <div class="text-sm text-slate-100 mb-1">${row.topic || ""}</div>
-          <div class="text-xs text-slate-400 mb-1">${row.caption || ""}</div>
-          ${
-            row.status
-              ? `<div class="inline-block px-2 py-0.5 rounded text-[10px] ${
-                  row.status === "ok"
-                    ? "bg-emerald-800/40 text-emerald-100"
-                    : "bg-red-800/40 text-red-100"
-                }">${row.status}</div>`
-              : ""
-          }
-          ${
-            row.provider
-              ? `<span class="ml-2 text-[10px] text-slate-400">(${row.provider})</span>`
-              : ""
-          }
-          ${
-            row.raw
-              ? `<pre class="mt-2 text-[10px] text-slate-200 bg-black/30 p-2 rounded overflow-auto">${JSON.stringify(row.raw, null, 2)}</pre>`
-              : ""
-          }
-        `;
-        container.appendChild(div);
-      });
-    } catch (err) {
-      statusEl.textContent = "Error loading logs.";
-      container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${err}</pre>`;
-    }
+// we will keep user in localStorage (like you had)
+let currentUser = null;
+const saved = localStorage.getItem("mo_user");
+if (saved) {
+  try {
+    currentUser = JSON.parse(saved);
+  } catch (e) {
+    currentUser = null;
   }
-</script>
-</body>
-</html>
+}
 
-      // initial
+// ------------------ renderer ------------------
+function render(view) {
+  const contentEl = document.getElementById("main-view");
+  if (!contentEl) return;
+  const navButtons = document.querySelectorAll("nav button, .side-nav button, .side-nav a");
+  navButtons.forEach((b) => {
+    if (b.dataset && b.dataset.view) {
+      b.classList.toggle("active", b.dataset.view === view);
+    }
+  });
+
+  // DASHBOARD
+  if (view === "dashboard") {
+    contentEl.innerHTML = `
+      <div class="panel">
+        <h2>Welcome ${currentUser ? currentUser.email : "Guest"}</h2>
+        <p style="font-size:0.8rem;color:var(--muted);">
+          This is your MarketOrbit MVP. Generate content, test posting, and review errors.
+        </p>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <h2>Quick Actions</h2>
+          <button class="primary" onclick="render('content')">Generate content</button>
+          <button class="secondary" onclick="render('scheduler')">View scheduler</button>
+          <button class="secondary" onclick="render('activity')">See activity</button>
+        </div>
+        <div class="panel">
+          <h2>Recent Activity</h2>
+          <div id="recent-activity" style="font-size:0.7rem;color:var(--muted);">No activity yet.</div>
+        </div>
+      </div>
+    `;
+    // show top 5 if we already have them in memory (optional)
+    renderActivityList("recent-activity", 5);
+    return;
+  }
+
+  // CONTENT
+  if (view === "content") {
+    contentEl.innerHTML = `
+      <div class="panel">
+        <h2>Content / AI Studio</h2>
+        <p>Enter a topic, generate a post (AI if key present), then optionally send to Facebook.</p>
+        <label>TOPIC / IDEA</label>
+        <input id="topic-input" placeholder="e.g. Reels tips for wellness brands" />
+        <div style="margin-top:1rem;display:flex;gap:.5rem;">
+          <button class="primary" onclick="generateDraft()">Generate draft</button>
+          <button onclick="generateAndPost()">Generate &amp; post to Facebook</button>
+        </div>
+        <div id="content-result" style="margin-top:1rem;font-size:.75rem;"></div>
+      </div>
+    `;
+    return;
+  }
+
+  // SCHEDULER (placeholder)
+  if (view === "scheduler") {
+    contentEl.innerHTML = `
+      <div class="panel">
+        <h2>Scheduler</h2>
+        <p>Demo scheduler panel. (Later we'll add rows from Supabase.)</p>
+      </div>
+    `;
+    return;
+  }
+
+  // ACTIVITY VIEW – this is where we use the Netlify function
+  if (view === "activity") {
+    contentEl.innerHTML = `
+      <div class="panel">
+        <h2>Activity / Errors</h2>
+        <p class="muted" style="font-size:.7rem;">
+          These entries come from your Supabase table <code>activity_logs</code> via the Netlify function
+          <code>/.netlify/functions/get-logs</code>.
+        </p>
+        <p id="logs-status" style="font-size:.65rem;margin-top:.5rem;">Loading...</p>
+        <div id="logs-container" style="margin-top:1rem;display:flex;flex-direction:column;gap:.5rem;"></div>
+      </div>
+    `;
+    // fetch them
+    loadActivityLogs();
+    return;
+  }
+}
+
+// ------------------ activity list helper (used on dashboard) ------------------
+let activityLog = []; // we can push into this when we do actions
+
+function addActivity(entry) {
+  const row = {
+    title: entry.title || "Activity",
+    detail: entry.detail || null,
+    time: new Date().toISOString(),
+  };
+  activityLog.unshift(row);
+}
+
+function renderActivityList(elId, limit) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const items = limit ? activityLog.slice(0, limit) : activityLog;
+  if (!items.length) {
+    el.innerHTML = `<p style="font-size:0.7rem;color:var(--muted);">No activity yet.</p>`;
+    return;
+  }
+  el.innerHTML = items
+    .map(
+      (a) => `
+      <div style="border-bottom:1px solid rgba(36,48,71,0.3);padding:.35rem 0;">
+        <div style="font-size:0.65rem;color:rgba(203,213,245,0.5);">${a.time}</div>
+        <div style="font-size:0.75rem;">${a.title}</div>
+        ${a.detail ? `<pre>${JSON.stringify(a.detail, null, 2)}</pre>` : ""}
+      </div>
+    `
+    )
+    .join("");
+}
+
+// ------------------ actions (same shape as before) ------------------
+async function generateDraft() {
+  const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
+  setStatus("Generating draft...");
+  const out = document.getElementById("content-result");
+  out.innerHTML = "";
+
+  const res = await fetch("/.netlify/functions/generate-and-post", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic, mode: "draft" }),
+  });
+
+  const data = await res.json();
+  if (data.ok) {
+    out.innerHTML = `<div class="success-banner">Draft generated.</div><pre>${data.caption}</pre>`;
+    addActivity({ title: "Draft generated", detail: data });
+  } else {
+    out.innerHTML = `<div class="error-banner">${data.message || "Draft failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    addActivity({ title: "Draft failed", detail: data });
+  }
+  setStatus("Ready.");
+}
+
+async function generateAndPost() {
+  const topic = document.getElementById("topic-input").value || "Sample post from MarketOrbit MVP";
+  setStatus("Generating and posting to Facebook...");
+  const out = document.getElementById("content-result");
+  out.innerHTML = "";
+
+  const res = await fetch("/.netlify/functions/generate-and-post", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic, mode: "post" }),
+  });
+
+  const data = await res.json();
+  if (data.ok) {
+    out.innerHTML = `<div class="success-banner">Posted to Facebook ✅</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    addActivity({ title: "Posted to Facebook", detail: data });
+  } else {
+    out.innerHTML = `<div class="error-banner">${data.message || "Post failed"}</div><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    addActivity({ title: "Post to Facebook failed", detail: data });
+  }
+  setStatus("Ready.");
+}
+
+// ------------------ account save (from your old code) ------------------
+function saveAccount() {
+  const emailEl = document.getElementById("acct-email");
+  const email = emailEl.value.trim();
+  if (!email) return;
+  currentUser = { email };
+  localStorage.setItem("mo_user", JSON.stringify(currentUser));
+  setStatus("Account saved locally.");
+}
+
+// fake login / fake register (from your old code)
+document.addEventListener("DOMContentLoaded", () => {
+  const fakeLogin = document.getElementById("fake-login-btn");
+  if (fakeLogin) {
+    fakeLogin.onclick = () => {
+      currentUser = { email: "demo@marketorbit.app" };
+      localStorage.setItem("mo_user", JSON.stringify(currentUser));
+      setStatus("Logged in (local only).");
       render("dashboard");
-    </script>
-  </body>
-</html>
+    };
+  }
+
+  const fakeRegister = document.getElementById("fake-register-btn");
+  if (fakeRegister) {
+    fakeRegister.onclick = () => {
+      currentUser = { email: "newuser@marketorbit.app" };
+      localStorage.setItem("mo_user", JSON.stringify(currentUser));
+      setStatus("Account created (local only).");
+      render("dashboard");
+    };
+  }
+
+  // hook up nav buttons with data-view
+  document.querySelectorAll("[data-view]").forEach((b) => {
+    b.addEventListener("click", () => render(b.dataset.view));
+  });
+});
+
+// ------------------ NEW: load activity from Supabase via Netlify ------------------
+async function loadActivityLogs() {
+  const statusEl = document.getElementById("logs-status");
+  const container = document.getElementById("logs-container");
+  if (!statusEl || !container) return;
+
+  statusEl.textContent = "Loading...";
+  container.innerHTML = "";
+
+  try {
+    const res = await fetch("/.netlify/functions/get-logs");
+    const data = await res.json();
+
+    if (!data.ok) {
+      statusEl.textContent = "Could not load logs.";
+      container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${JSON.stringify(data, null, 2)}</pre>`;
+      return;
+    }
+
+    const logs = data.data;
+    statusEl.textContent = `Loaded ${logs.length} log(s).`;
+
+    if (!logs.length) {
+      container.innerHTML = `<p class="text-sm text-slate-400">No logs yet.</p>`;
+      return;
+    }
+
+    logs.forEach((row) => {
+      const div = document.createElement("div");
+      div.className = "rounded border border-slate-700 bg-slate-900/40 p-3 mb-2";
+      div.innerHTML = `
+        <div class="text-sm text-slate-100">${row.action || "unknown"} (${row.created_at || ""})</div>
+        <div class="text-xs text-slate-400">${row.topic || ""}</div>
+        <div class="text-xs text-slate-300">${row.caption || ""}</div>
+        <div class="text-xs text-slate-400">${row.status || ""}</div>
+        ${row.provider ? `<span class="ml-2 text-[10px] text-slate-400">${row.provider}</span>` : ""}
+        ${row.raw ? `<pre class="mt-2 text-[10px] text-slate-200 bg-black/30 p-2 rounded overflow-auto">${JSON.stringify(row.raw, null, 2)}</pre>` : ""}
+      `;
+      container.appendChild(div);
+    });
+  } catch (err) {
+    statusEl.textContent = "Error loading logs.";
+    container.innerHTML = `<pre class="text-xs text-red-300 bg-red-900/20 p-3 rounded">${err}</pre>`;
+  }
+}
+
+// ------------------ initial view ------------------
+render("dashboard");
+</script>
