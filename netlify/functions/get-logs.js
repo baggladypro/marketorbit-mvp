@@ -10,71 +10,76 @@ exports.handler = async function () {
       body: JSON.stringify({
         ok: false,
         error: "Supabase env vars missing in Netlify.",
-        got: {
-          SUPABASE_URL: SUPABASE_URL || null,
-          SUPABASE_SERVICE_ROLE: !!SUPABASE_SERVICE_ROLE,
-        },
       }),
     };
   }
 
-  // this is the exact endpoint we're going to hit
-  const url = `${SUPABASE_URL}/rest/v1/activity_logs?select=*&order=id.desc&limit=50`;
+  const base = `${SUPABASE_URL}/rest/v1/activity_logs`;
 
   try {
-    const resp = await fetch(url, {
+    // 1) write a test row through the SAME API we're reading from
+    const insertRes = await fetch(base, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        action: "netlify_probe",
+        topic: "api wrote this",
+        caption: "if you see this, API is writing to a DB",
+      }),
+    });
+
+    const insertText = await insertRes.text();
+
+    // 2) now read back
+    const selectUrl = `${base}?select=*&order=id.desc&limit=50`;
+    const selectRes = await fetch(selectUrl, {
       headers: {
         apikey: SUPABASE_SERVICE_ROLE,
         Authorization: `Bearer ${SUPABASE_SERVICE_ROLE}`,
         Prefer: "return=representation",
       },
     });
+    const selectText = await selectRes.text();
 
-    const text = await resp.text();
-
-    if (!resp.ok) {
-      return {
-        statusCode: resp.status,
-        body: JSON.stringify({
-          ok: false,
-          step: "supabase-fetch",
-          status: resp.status,
-          url,
-          supabase: text,
-        }),
-      };
-    }
-
-    let data = [];
+    let rows = [];
     try {
-      data = JSON.parse(text);
+      rows = JSON.parse(selectText);
+      if (!Array.isArray(rows)) rows = [];
     } catch (e) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          ok: false,
-          step: "json-parse",
-          url,
-          raw: text,
-        }),
-      };
+      rows = [];
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        ok: true,
-        url,
-        count: Array.isArray(data) ? data.length : 0,
-        logs: Array.isArray(data) ? data : [],
-      }),
+      body: JSON.stringify(
+        {
+          ok: true,
+          wrote: {
+            status: insertRes.status,
+            raw: insertText,
+          },
+          read: {
+            status: selectRes.status,
+            url: selectUrl,
+            count: rows.length,
+            rows,
+          },
+        },
+        null,
+        2
+      ),
     };
   } catch (err) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         ok: false,
-        step: "netlify-catch",
+        step: "catch",
         error: err.message,
       }),
     };
