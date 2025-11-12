@@ -36,6 +36,8 @@ async function logActivity(entry) {
 
 // --- main function ---
 export async function handler(event, context) {
+ throw new Error("test error for logs");
+
   // we want to remember the topic even if we error
   let topicFromRequest = "";
 
