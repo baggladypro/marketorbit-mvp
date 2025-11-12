@@ -12,6 +12,8 @@ async function logActivity(entry) {
   }
 
   try {
+  throw new Error("forced test error");
+
     await fetch(`${SUPABASE_URL}/rest/v1/activity_logs`, {
       method: "POST",
       headers: {
@@ -42,6 +44,8 @@ export async function handler(event, context) {
   let topicFromRequest = "";
 
   try {
+ throw new Error("forced test error");
+
     // only allow POST
     if (event.httpMethod !== "POST") {
       return {
